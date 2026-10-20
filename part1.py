@@ -288,7 +288,9 @@ Example: if there are 5 non-null values in the first column, 3 in the second, 4 
 
 def q5a(dfs):
     # TODO
-    raise NotImplementedError
+    for df in dfs:
+        df.info()
+    return [100, 100, 100, 100, 100, 100, 100, 100]
     # Remember to return the list here
     # (Since .info() does not return any values,
     # for this part, you will need to copy and paste
@@ -296,7 +298,7 @@ def q5a(dfs):
 
 def q5b(dfs):
     # TODO
-    raise NotImplementedError
+    return dfs[2].count().tolist()
     # Remember to return the list here
 
 """
@@ -308,7 +310,7 @@ We will use this in the unit tests below.
 """
 
 def q5c():
-    raise NotImplementedError
+    return [100, 100, 100, 100, 100, 100, 100, 100]
     # TODO: fill this in with the expected number
     # num_non_null = [0, 0, ...]
     # return num_non_null
@@ -350,7 +352,7 @@ def test_q2():
     dfs = load_input()
     assert q2(dfs)
 
-
+@pytest.mark.xfail
 def test_q3():
     dfs = load_input()
     assert q3(dfs)
@@ -373,14 +375,14 @@ def test_q5():
 6a. Are there any tests which fail?
 
 === ANSWER Q6a BELOW ===
-
+test_q3.
 === END OF Q6a ANSWER ===
 
 6b. For each test that fails, is it because your code
 is wrong or because the test is wrong?
 
 === ANSWER Q6b BELOW ===
-
+the test is wrong. It insist the answer is True, whereas in reality it should return false.
 === END OF Q6b ANSWER ===
 
 IMPORTANT: for any failing tests, if you think you have
@@ -398,7 +400,7 @@ Please include expected failures (@pytest.mark.xfail).
 
 def q6c():
     # TODO
-    raise NotImplementedError
+    return 1
 
 """
 ===== End of interlude =====
@@ -415,9 +417,11 @@ As your answer to this part, return the number of columns in each dataframe afte
 """
 
 def q7(dfs):
-    # TODO
-    raise NotImplementedError
-    # Remember to return the list here
+    columnCounts = []
+    for year, df in zip([2019, 2020, 2021], dfs):
+        df['year'] = year
+        columnCounts.append(len(df.columns))
+    return columnCounts
 
 """
 8a.
@@ -427,17 +431,19 @@ As your answer, return the count for "USA" in 2021.
 """
 
 def q8a(dfs):
-    # Enter Code here
-    # TODO
-    raise NotImplementedError
-    # Remember to return the count here
+    for year, df in zip([2019, 2020, 2021], dfs):
+        regionCounts = df['region'].value_counts()
+        print(year)
+        print(regionCounts)
+    return int(regionCounts.get('USA', 0))
 
 """
 8b.
 Do you notice some trend? Comment on what you observe and why might that be consistent throughout the years.
 
 === ANSWER Q8b BELOW ===
-
+The USA, UK, and China have the most universities in the top 100 in all three years.
+Might due to development of the country, along with the investment put into education.
 === END OF Q8b ANSWER ===
 """
 
@@ -455,7 +461,8 @@ The list should contain 5 elements.
 def q9(dfs):
     # Enter code here
     # TODO
-    raise NotImplementedError
+    average = dfs[2][NEW_COLUMNS[3:]].mean()
+    return average
     # Return the list here
 
 """
