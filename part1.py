@@ -59,7 +59,7 @@ To begin, let's load the Pandas library.
 """
 
 import pandas as pd
-from dask.rewrite import head
+from pathlib import Path
 
 """
 1. Load the dataset into Pandas
@@ -90,8 +90,8 @@ def load_input():
 
     # Standardizing the column names
     df_2019.columns = df_2019.columns.str.lower()
-    df_2020.columns = df_2019.columns.str.lower()
-    df_2021.columns = df_2019.columns.str.lower()
+    df_2020.columns = df_2020.columns.str.lower()
+    df_2021.columns = df_2021.columns.str.lower()
 
     # Restructuring the column indexes
     # Fill out this part. You can use column access to get only the
@@ -147,14 +147,6 @@ def q2(dfs):
 
     return True
 
-
-    # Check:
-    # - that all three dataframes have the same shape
-    # - the number of rows
-    # - the number of columns
-    # - the columns are listed in the correct order
-    raise NotImplementedError
-
 """
 ===== Interlude: Checking your output so far =====
 
@@ -167,6 +159,7 @@ You are welcome to also print out stuff to the console
 in each question if you find it helpful.
 """
 
+Path("output").mkdir(exist_ok=True)
 ANSWER_FILE = "output/part1-answers.txt"
 
 def interlude():
@@ -263,7 +256,8 @@ Strengths:
 Weaknesses:
 1. Only top 100 universities, so not very representative
 2. 2019 universities are different then the 2020 and 2021 universities, need alignment
-3. 2021 data is identical to that of 2020
+3. 2021 data is almost identical to that of 2020
+
 === END OF Q4b ANSWER ===
 """
 
@@ -463,7 +457,7 @@ def q9(dfs):
     # Enter code here
     # TODO
     average = dfs[2][NEW_COLUMNS[3:]].mean()
-    return average
+    return average.tolist()
     # Return the list here
 
 """
@@ -566,17 +560,14 @@ As the answer to this part, return the name of the plot you saved.
 import matplotlib.pyplot as plt
 
 def q13a(avg_2021):
-    # Plot the box and whisker plot
     avg_2021.boxplot(figsize=(12, 8))
-    plt.savefig('output/part1-13a.png')
-    plt.title = ('2021 regional average')
-    plt.xlabel('attribution')
+    plt.title('2021 Regional Average Scores')
+    plt.xlabel('Attribute')
     plt.xticks(rotation=25, ha='right')
-    plt.ylabel('score')
+    plt.ylabel('Score')
     plt.tight_layout()
     plt.savefig('output/part1-13a.png')
     plt.close()
-
     return 'output/part1-13a.png'
 """
 b. Do you observe any anomalies in the box and whisker
@@ -598,16 +589,29 @@ As the answer to this part, return the name of the plot you saved.
 """
 
 def q14a(avg_2021):
-    # Enter code here
-    # TODO
-    raise NotImplementedError
-    # return "output/part1-14a.png"
+    plt.figure(figsize=(8, 6))
+    plt.scatter(
+        avg_2021['academic reputation'],
+        avg_2021['employer reputation'],
+        label='Regional averages'
+    )
+    plt.title('Academic and Employer Reputation in 2021')
+    plt.xlabel('Academic Reputation')
+    plt.ylabel('Employer Reputation')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('output/part1-14a.png')
+    plt.close()
+    return 'output/part1-14a.png'
 
 """
 Do you observe any general trend?
 
 === ANSWER Q14b BELOW ===
-
+The points are widely scattered. Academic and employer reputation have
+a weak positive relationship across regions (correlation about 0.16).
+A higher academic reputation does not consistently imply a higher
+employer reputation in these regional averages.
 === END OF Q14b ANSWER ===
 
 ===== Questions 15-20: Exploring the data further =====
@@ -629,16 +633,17 @@ As your answer, return the shape of the new dataframe.
 """
 
 def q15_helper(dfs):
-    # Return the new dataframe
-    # TODO
-    # Placeholder:
-    top_10 = pd.DataFrame()
+    columns = ['university', 'overall score']
+    top2019 = dfs[0].sort_values('rank').head(10)[columns]
+    top2020 = dfs[1].sort_values('rank').head(10)[columns]
+    top2021 = dfs[2].sort_values('rank').head(10)[columns]
+
+    top_10 = top2019.merge(top2020, on='university')
+    top_10 = top_10.merge(top2021, on='university')
     return top_10
 
 def q15(top_10):
-    # Enter code here
-    # TODO
-    raise NotImplementedError
+    return top_10.shape
 
 """
 16.
@@ -652,10 +657,8 @@ As your answer, return the new column names as a list.
 """
 
 def q16(top_10):
-    # Enter code here
-    # TODO
-    raise NotImplementedError
-    # return list(df.columns)
+    top_10.columns = ['university', 'score_2019', 'score_2020', 'score_2021']
+    return list(top_10.columns)
 
 """
 17a.
@@ -671,18 +674,37 @@ Note:
 """
 
 def q17a(top_10):
-    # Enter code here
-    # TODO
-    raise NotImplementedError
-    # return "output/part1-17a.png"
+    # A line plot makes changes across the years easy to compare.
+
+    plt.figure(figsize=(12, 7))
+    years = [2019, 2020, 2021]
+    for i in range(len(top_10)):
+        university = top_10.iloc[i]['university']
+        scores = top_10.iloc[i][['score_2019', 'score_2020', 'score_2021']].tolist()
+        plt.plot(years, scores, marker='o', label=university)
+    plt.title('Top 10 University Scores Across Three Years')
+    plt.xlabel('Year')
+    plt.ylabel('Overall Score')
+    plt.xticks(years)
+    plt.legend(bbox_to_anchor=(1.02, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig('output/part1-17a.png', bbox_inches='tight')
+    plt.close()
+    return 'output/part1-17a.png'
+
+
 
 """
 17b.
 What do you observe from the plot above? Which university has remained consistent in their scores? Which have increased/decreased over the years?
 
 === ANSWER Q17b BELOW ===
+MIT stayed at 100 across all three years. UCL increased from 92.9 to 94.8,
+while Chicago decreased from 93.2 to 92.0. Scores in 2020 and 2021 are
+the same for these universities, so there is no change between them.
 
 === END OF Q17b ANSWER ===
+
 """
 
 """
@@ -709,16 +731,30 @@ As the answer to this part, return the name of the plot you saved.
 def q18(dfs):
     # Enter code here
     # TODO
-    raise NotImplementedError
-    # return "output/part1-18.png"
-
+    columns = ['rank'] + NEW_COLUMNS[3:]
+    correlation = dfs[2][columns].corr()
+    print(correlation)
+    plt.figure(figsize=(10, 8))
+    plt.imshow(correlation, cmap='coolwarm', vmin=-1, vmax=1)
+    plt.xticks(range(len(columns)), columns, rotation=40, ha='right')
+    plt.yticks(range(len(columns)), columns)
+    plt.colorbar(label='Correlation')
+    plt.title('University Ranking Correlations in 2021')
+    plt.tight_layout()
+    plt.savefig('output/part1-18.png')
+    plt.close()
+    return 'output/part1-18.png'
 """
+
 19. Comment on at least one entry in the matrix you obtained in the previous
 part that you found surprising or interesting.
 
 === ANSWER Q19 BELOW ===
-
+Rank and overall score have a strong negative correlation. Higher scores
+come with smaller rank numbers, because rank 1 is the best position.
+Thus the negative sign makes sense.
 === END OF Q19 ANSWER ===
+
 """
 
 """
@@ -755,13 +791,22 @@ Use your new column to sort the data by the new values and return the top 10 uni
 
 def q20a(dfs):
     # TODO
-    raise NotImplementedError
+    df = dfs[2]
+    berkeley = df['university'] == 'University of California, Berkeley (UCB)'
+    df['new score'] = df['overall score']
+    # Deliberately favor Berkeley for this exercise.
+    df.loc[berkeley, 'new score'] = df['overall score'].max() + 1
     # For your answer, return the score for Berkeley in the new column.
+    return float(df.loc[berkeley, 'new score'].iloc[0])
+
 
 def q20b(dfs):
     # TODO
-    raise NotImplementedError
+    q20a(dfs)
+    sortedUniversities = dfs[2].sort_values('new score', ascending=False)
     # For your answer, return the top 10 university names as a list.
+    return sortedUniversities['university'].head(10).tolist()
+
 
 """
 21. Exploring data manipulation and falsification, continued
@@ -781,7 +826,17 @@ Return the top 10 university names as a list from the falsified data.
 
 def q21():
     # TODO
-    raise NotImplementedError
+    df = pd.read_csv('data/2021.csv', encoding='latin-1')
+    df.columns = df.columns.str.lower()
+    berkeley = df['university'] == 'University of California, Berkeley (UCB)'
+    df.loc[berkeley, 'overall score'] = df['overall score'].max() + 1
+    df = df.sort_values('overall score', ascending=False)
+    df['rank'] = range(1, len(df) + 1)
+    filename = 'data/2021_falsified.csv'
+    df.to_csv(filename, index=False, encoding='latin-1')
+    falsified = pd.read_csv(filename, encoding='latin-1')
+    return falsified.sort_values('rank')['university'].head(10).tolist()
+
 
 """
 22. Exploring data manipulation and falsification, continued
@@ -792,8 +847,12 @@ if you were a "bad actor" trying to manipulate the rankings?
 Which do you think would be the most difficult to detect?
 
 === ANSWER Q22 BELOW ===
-
+Changing the source file can affect every later analysis using that file.
+A biased scoring formula might be harder to notice if its rules look
+reasonable. However, our Berkeley bonus is obvious. Comparing the file
+with the original data and checking the scoring rules can reveal both.
 === END OF Q22 ANSWER ===
+
 """
 
 """
