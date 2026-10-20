@@ -59,6 +59,7 @@ To begin, let's load the Pandas library.
 """
 
 import pandas as pd
+from dask.rewrite import head
 
 """
 1. Load the dataset into Pandas
@@ -479,8 +480,9 @@ def q10_helper(dfs):
     # Enter code here
     # TODO
     # Placeholder for the avg_2021 dataframe
-    avg_2021 = pd.DataFrame()
+    avg_2021 = dfs[2].groupby('region')[NEW_COLUMNS[3:]].mean()
     return avg_2021
+
 
 def q10(avg_2021):
     """
@@ -491,7 +493,8 @@ def q10(avg_2021):
     (That is, return the integer 5)
     """
     # Enter code here
-    raise NotImplementedError
+    print(avg_2021.head())
+    return 5
     # Return 5
 
 """
@@ -504,7 +507,8 @@ As your answer to this part, return the first row of the sorted dataframe.
 """
 
 def q11(avg_2021):
-    raise NotImplementedError
+    sortedRegion = avg_2021.sort_values(by=['overall score'], ascending=False)
+    return sortedRegion.iloc[0]
 
 """
 12a.
@@ -529,8 +533,13 @@ and the name of one country/region that went down in the rankings.
 """
 
 def q12a(avg_2021):
-    raise NotImplementedError
-    return ("TODO", "TODO")
+    sortedRegions = avg_2021.sort_values(
+        'overall score',
+        ascending=False
+    )
+    print(sortedRegions)
+
+    return ('Singapore', 'South Korea')
 
 """
 12b.
@@ -538,7 +547,8 @@ Comment on why the country above is at the top of the list.
 (Note: This is an open-ended question.)
 
 === ANSWER Q12b BELOW ===
-
+Singapore has the highest average overall score among the regions represented in this dataset.
+small number of strong universities can produce a high average, thus, singapore is at the top of the list.
 === END OF Q12b ANSWER ===
 """
 
@@ -557,16 +567,23 @@ import matplotlib.pyplot as plt
 
 def q13a(avg_2021):
     # Plot the box and whisker plot
-    # TODO
-    raise NotImplementedError
-    # return "output/part1-13a.png"
+    avg_2021.boxplot(figsize=(12, 8))
+    plt.savefig('output/part1-13a.png')
+    plt.title = ('2021 regional average')
+    plt.xlabel('attribution')
+    plt.xticks(rotation=25, ha='right')
+    plt.ylabel('score')
+    plt.tight_layout()
+    plt.savefig('output/part1-13a.png')
+    plt.close()
 
+    return 'output/part1-13a.png'
 """
 b. Do you observe any anomalies in the box and whisker
 plot?
 
 === ANSWER Q13b BELOW ===
-
+high outlier: Singapore, with an average score of 91.8.
 === END OF Q13b ANSWER ===
 """
 
