@@ -97,9 +97,12 @@ def load_input():
     # columns we are interested in using the NEW_COLUMNS variable above.
     # Make sure you return the columns in the new order.
     # TODO
+    df_2019 = df_2019[NEW_COLUMNS]
+    df_2020 = df_2020[NEW_COLUMNS]
+    df_2021 = df_2021[NEW_COLUMNS]
 
     # When you are done, remove the next line...
-    raise NotImplementedError
+
 
     # ...and keep this line to return the dataframes.
     return [df_2019, df_2020, df_2021]
@@ -133,6 +136,17 @@ def q2(dfs):
     You can check that the "answers" to each part look
     correct by inspecting the file part1-answers.txt.
     """
+    if len(dfs) != 3:
+        return False
+    for df in dfs:
+        if df.shape != (100, 8):
+            return False
+        if list(df.columns) != NEW_COLUMNS:
+            return False
+
+    return True
+
+
     # Check:
     # - that all three dataframes have the same shape
     # - the number of rows
@@ -179,15 +193,18 @@ def q3(dfs):
     # - that the set of university names in each year is the same
     # Return:
     # - True if they are the same, and False otherwise.
-    raise NotImplementedError
-
+    universities2019 = set(dfs[0]['university'])
+    universities2020 = set(dfs[1]['university'])
+    universities2021 = set(dfs[2]['university'])
+    return universities2019 == universities2020 == universities2021
 """
 3b (commentary).
 Did the checks pass or fail?
 Comment below and explain why.
 
 === ANSWER Q3b BELOW ===
-
+The checks failed. Because the university names arent identical, that is, only 2020 and 2021 sets are identical and 2019 
+have unique university names.
 === END OF Q3b ANSWER ===
 """
 
@@ -215,10 +232,16 @@ Hint:
 def q4(dfs):
     # Sample 5 rows from each dataframe
     # Print out the samples
-    raise NotImplementedError
+    for df in dfs:
+        sample =  df.sample(5)
+        print(sample)
+        universitiesNames = []
+        for names in sample['university']:
+            universitiesNames.append(names)
+
+    return universitiesNames
 
     # Answer as a list of 5 university names
-    return []
 
 """
 Once you have implemented this part,
@@ -233,13 +256,13 @@ some advantages and drawbacks?
 
 === ANSWER Q4b BELOW ===
 Strengths:
-1.
-2.
+1. Included diverse region
+2. Have many rating criteria
 
 Weaknesses:
-1.
-2.
-3.
+1. Only top 100 universities, so not very representative
+2. 2019 universities are different then the 2020 and 2021 universities, need alignment
+3. 2021 data is identical to that of 2020
 === END OF Q4b ANSWER ===
 """
 
@@ -316,29 +339,29 @@ from each unit test (function beginning with `test_`).
 Then, run `pytest part1.py` in the terminal.
 """
 
-@pytest.mark.skip
+
 def test_q1():
     dfs = load_input()
     assert len(dfs) == 3
     assert all([isinstance(df, pd.DataFrame) for df in dfs])
 
-@pytest.mark.skip
+
 def test_q2():
     dfs = load_input()
     assert q2(dfs)
 
-@pytest.mark.skip
+
 def test_q3():
     dfs = load_input()
     assert q3(dfs)
 
-@pytest.mark.skip
+
 def test_q4():
     dfs = load_input()
     samples = q4(dfs)
     assert len(samples) == 5
 
-@pytest.mark.skip
+
 def test_q5():
     dfs = load_input()
     num_non_null = q5c()
